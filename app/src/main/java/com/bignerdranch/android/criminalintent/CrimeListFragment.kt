@@ -31,7 +31,15 @@ class CrimeListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentCrimeListBinding.inflate(inflater, container, false)
+        val crimes = crimeListViewModel.crimes
+        //a Recycler view delegates 3 things.
+        // First is Layout manager, in onCreateView, which positions and scrolls
         binding.crimeRecyclerView.layoutManager = LinearLayoutManager(context)
+        // then is adapter, which makes viewholders and binds views to them.
+        val adapter = CrimeListAdapter(crimes)
+        binding.crimeRecyclerView.adapter = adapter
+        // then is ViewHolder, which holds itemviews, and are created by the recycler (in this case CrimeHolder)
+
         return binding.root
     }
 
