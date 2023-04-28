@@ -7,12 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bignerdranch.android.criminalintent.databinding.FragmentCrimeListBinding
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 private const val TAG = "CrimeListFragment"
 class CrimeListFragment : Fragment() {
     private val crimeListViewModel : CrimeListViewModel by viewModels()
+    private var job: Job? =null
     private var _binding: FragmentCrimeListBinding? = null
     private val binding
         get() = checkNotNull(_binding){
@@ -41,6 +45,19 @@ class CrimeListFragment : Fragment() {
         // then is ViewHolder, which holds itemviews, and are created by the recycler (in this case CrimeHolder)
 
         return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        job = viewLifecycleOwner.lifecycleScope.launch {
+            val crimes = crimeListViewModel.loadCrimes()
+            binding.crimeRecyclerView.adapter = CrimeListAdapter(crimes)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        job?.cancel()
     }
 
     override fun onDestroyView() {
