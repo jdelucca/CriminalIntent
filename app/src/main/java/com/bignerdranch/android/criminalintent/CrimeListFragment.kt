@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bignerdranch.android.criminalintent.databinding.FragmentCrimeListBinding
 import kotlinx.coroutines.Job
@@ -24,10 +26,7 @@ class CrimeListFragment : Fragment() {
         }
 
     
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate: Total crimes: ${crimeListViewModel.crimes.size}")
-    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,29 +34,18 @@ class CrimeListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentCrimeListBinding.inflate(inflater, container, false)
-        val crimes = crimeListViewModel.crimes
-        //a Recycler view delegates 3 things.
-        // First is Layout manager, in onCreateView, which positions and scrolls
         binding.crimeRecyclerView.layoutManager = LinearLayoutManager(context)
-        // then is adapter, which makes viewholders and binds views to them.
-        val adapter = CrimeListAdapter(crimes)
-        binding.crimeRecyclerView.adapter = adapter
-        // then is ViewHolder, which holds itemviews, and are created by the recycler (in this case CrimeHolder)
-
         return binding.root
     }
 
-    override fun onStart() {
-        super.onStart()
-        job = viewLifecycleOwner.lifecycleScope.launch {
-            val crimes = crimeListViewModel.loadCrimes()
-            binding.crimeRecyclerView.adapter = CrimeListAdapter(crimes)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                val crimes = crimeListViewModel.loadCrimes()
+                binding.crimeRecyclerView.adapter = CrimeListAdapter(crimes)
+            }
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        job?.cancel()
     }
 
     override fun onDestroyView() {
