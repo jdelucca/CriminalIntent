@@ -7,29 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.bignerdranch.android.criminalintent.databinding.FragmentCrimeDetailBinding
 import java.util.*
-private const val TAG = "CrimeDetailFragment"
 
 class CrimeDetailFragment: Fragment() {
-    private lateinit var crime:Crime
     private val args: CrimeDetailFragmentArgs by navArgs()
+    private val crimeDetailViewModel: CrimeDetailViewModel by viewModels {
+        CrimeDetailViewModelFactory(args.crimeID)
+    }
     private var _binding: FragmentCrimeDetailBinding? = null
     private val binding
         get() = checkNotNull(_binding){
             "cannot access biding because it is null. is the view visible?"
         }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        crime = Crime(
-            id= UUID.randomUUID(),
-            title = "",
-            date = Date(),
-            isSolved = false
-        )
-        Log.d(TAG, "onCreate: crimeID is ${args.crimeID}")
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,14 +36,11 @@ class CrimeDetailFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply{
             crimeTitle.doOnTextChanged { text, _, _, _ ->
-                crime = crime.copy(title = text.toString())
             }
             crimeDate.apply {
-                text = crime.date.toString()
                 isEnabled = false
             }
             crimeSolved.setOnCheckedChangeListener { _, isChecked ->
-                crime = crime.copy(isSolved = isChecked)
             }
         }
     }
